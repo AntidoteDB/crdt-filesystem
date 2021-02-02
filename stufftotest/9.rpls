@@ -192,25 +192,16 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
             readInvocation.info == readFile(fileOwnerId, fileId) // all the reads that happen after the policy change (protection is applicable)
         &&  readInvocation.result != NoResult()
         ==>
-            forall  changePermissionCall: CallId, changePermissionInvocation: InvocationId, someAccessRight: AccessRight::
+            forall  changePermissionCall: CallId, changePermissionInvocation: InvocationId, someAccessRight: AccessRight, user1: UserId, user2: UserId::
                     (someAccessRight == AW() || someAccessRight == ANone() || someAccessRight == UW() || someAccessRight == UNone()) // read permissions revoked
                 &&  changePermissionCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(someAccessRight)))))
                 &&  changePermissionCall.origin == changePermissionInvocation 
                 &&  changePermissionInvocation happened before readInvocation
-                &&  (
-                        (
-                            exists adminOrOwner: UserId ::
-                                    changePermissionInvocation.info == changeOwnerPermission(adminOrOwner, someAccessRight, fileId) 
-                                &&  changePermissionInvocation.result == changeOwnerPermission_res(true)
-                        )
-                        ||  (
-                            exists  fileCreatorId: UserId, fileOriginalGroupId: GroupId ::
-                                    changePermissionInvocation.info == createFile(fileCreatorId, fileOriginalGroupId)
-                                &&  changePermissionInvocation.result == createFile_res(FileRes(fileId))
-                        )
-                    )
+                &&  changePermissionInvocation.result != createFile_res(NoFile)
+                &&  changePermissionInvocation.result != changeOwnerPermission_res(false)
+                &&  changePermissionInvocation.result != NoResult()
                 ==>
-                    forall changeOwnerCall: CallId, changeOwnerInvocation: InvocationId ::
+                    forall changeOwnerCall: CallId, changeOwnerInvocation: InvocationId, user1: UserId, ar: AccessRight ::
                             changeOwnerCall.op == Op(files(NestedOp(fileId, file_owner(Assign(fileOwnerId))))) // quantify the file owner at the event of writing
                         &&  changeOwnerInvocation == changeOwnerCall.origin
                         &&  changeOwnerInvocation happened before readInvocation
@@ -220,18 +211,23 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
                                     anotherChangePermissionCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(someOtherAccessRight)))))
                                 &&  anotherChangePermissionCall.origin == anotherChangePermissionInvocation
                                 &&  anotherChangePermissionInvocation.result != NoResult()
+                                &&  anotherChangePermissionInvocation.result != createFile_res(NoFile)
+                                &&  anotherChangePermissionInvocation.result != changeOwnerPermission_res(false)
                                 &&  anotherChangePermissionInvocation happened before readInvocation
                                 &&  anotherChangePermissionInvocation happened after changePermissionInvocation  
-                                &&  (anotherChangePermissionInvocation happened before changeOwnerInvocation || anotherChangePermissionInvocation happened after changeOwnerInvocation)
+                                &&  (anotherChangePermissionInvocation happened before changeOwnerInvocation || anotherChangePermissionInvocation happened after changeOwnerInvocation || changePermissionInvocation == changeOwnerInvocation)
                         )
                         && ( // the most recent owner of the file
                             !exists changeOwnerInBetweenCall: CallId, changeOwnerInBetweenInvocation: InvocationId, differentUserId: UserId ::
                                     changeOwnerInBetweenCall.op == Op(files(NestedOp(fileId, file_owner(Assign(differentUserId)))))  // change owner to `user`
                                 &&  changeOwnerInBetweenInvocation == changeOwnerInBetweenCall.origin
                                 &&  differentUserId != fileOwnerId
+                                &&  changeOwnerInBetweenInvocation.result != NoResult()
+                                &&  changeOwnerInBetweenInvocation.result != createFile_res(NoFile)
+                                &&  changeOwnerInBetweenInvocation.result != changeOwnerPermission_res(false)
                                 &&  changeOwnerInBetweenInvocation happened before readInvocation
                                 &&  changeOwnerInBetweenInvocation happened after changeOwnerInvocation
-                                &&  (changeOwnerInBetweenInvocation happened before changePermissionInvocation || changeOwnerInBetweenInvocation happened after changePermissionInvocation)           
+                                &&  (changeOwnerInBetweenInvocation happened before changePermissionInvocation || changeOwnerInBetweenInvocation happened after changePermissionInvocation || changeOwnerInBetweenInvocation ==  changePermissionInvocation)
                         )
                         && ( // this only applies for user
                              !exists assignAdminCall: CallId, assignAdminInvocation: InvocationId ::
@@ -240,9 +236,24 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
                                 &&  assignAdminInvocation happened before changeOwnerInvocation
                                 &&  assignAdminInvocation happened before changePermissionInvocation
                         )
+                        && (
+                            (someAccessRight == UW() || someAccessRight == UNone())
+                            ==>
+                                (
+                                    !exists dominatingAdminCall: CallId,  dominatingAdminInvocation: InvocationId, adminOnlyAccessRight: AccessRight :: // admin grants read concurrently(user action must be rejected)
+                                            (adminOnlyAccessRight == AR() || adminOnlyAccessRight == ARW())
+                                        &&  dominatingAdminCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(adminOnlyAccessRight)))))
+                                        &&  dominatingAdminCall.origin == dominatingAdminInvocation
+                                        &&  dominatingAdminInvocation.result != NoResult()
+                                        &&  dominatingAdminInvocation.result != createFile_res(NoFile)
+                                        &&  dominatingAdminInvocation.result != changeOwnerPermission_res(false)
+                                        &&  dominatingAdminInvocation happened before readInvocation
+                                        &&  !(dominatingAdminInvocation happened before changePermissionInvocation)
+                                        &&  !(dominatingAdminInvocation happened after changePermissionInvocation) 
+                                )
+                        )
                         ==>
                             readInvocation.result == readFile_res(false)
-
 
 // An access policy for an owner to a file is defined by the pair of (OwnerSet, AccessRightOwner) that directly precede the write
 // accessibility
@@ -250,25 +261,16 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
             readInvocation.info == readFile(fileOwnerId, fileId) // all the reads that happen after the policy change (protection is applicable)
         &&  readInvocation.result != NoResult()
         ==>
-            forall  changePermissionCall: CallId, changePermissionInvocation: InvocationId, someAccessRight: AccessRight::
+            forall  changePermissionCall: CallId, changePermissionInvocation: InvocationId, someAccessRight: AccessRight, user1: UserId, user2: UserId::
                     (someAccessRight == AR() || someAccessRight == ARW() || someAccessRight == UR() || someAccessRight == URW()) // read permissions granted
                 &&  changePermissionCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(someAccessRight)))))
                 &&  changePermissionCall.origin == changePermissionInvocation 
                 &&  changePermissionInvocation happened before readInvocation
-                &&  (
-                        (
-                            exists adminOrOwner: UserId ::
-                                    changePermissionInvocation.info == changeOwnerPermission(adminOrOwner, someAccessRight, fileId) 
-                                &&  changePermissionInvocation.result == changeOwnerPermission_res(true)
-                        )
-                        ||  (
-                            exists  fileCreatorId: UserId, fileOriginalGroupId: GroupId ::
-                                    changePermissionInvocation.info == createFile(fileCreatorId, fileOriginalGroupId)
-                                &&  changePermissionInvocation.result == createFile_res(FileRes(fileId))
-                        )
-                    )
+                &&  changePermissionInvocation.result != createFile_res(NoFile)
+                &&  changePermissionInvocation.result != changeOwnerPermission_res(false)
+                &&  changePermissionInvocation.result != NoResult()
                 ==>
-                    forall changeOwnerCall: CallId, changeOwnerInvocation: InvocationId ::
+                    forall changeOwnerCall: CallId, changeOwnerInvocation: InvocationId, user1: UserId, ar: AccessRight ::
                             changeOwnerCall.op == Op(files(NestedOp(fileId, file_owner(Assign(fileOwnerId))))) // quantify the file owner at the event of writing
                         &&  changeOwnerInvocation == changeOwnerCall.origin
                         &&  changeOwnerInvocation happened before readInvocation
@@ -278,18 +280,23 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
                                     anotherChangePermissionCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(someOtherAccessRight)))))
                                 &&  anotherChangePermissionCall.origin == anotherChangePermissionInvocation
                                 &&  anotherChangePermissionInvocation.result != NoResult()
+                                &&  anotherChangePermissionInvocation.result != createFile_res(NoFile)
+                                &&  anotherChangePermissionInvocation.result != changeOwnerPermission_res(false)
                                 &&  anotherChangePermissionInvocation happened before readInvocation
                                 &&  anotherChangePermissionInvocation happened after changePermissionInvocation  
-                                &&  (anotherChangePermissionInvocation happened before changeOwnerInvocation || anotherChangePermissionInvocation happened after changeOwnerInvocation)
+                                &&  (anotherChangePermissionInvocation happened before changeOwnerInvocation || anotherChangePermissionInvocation happened after changeOwnerInvocation || anotherChangePermissionInvocation == changeOwnerInvocation)
                         )
                         && ( // the most recent owner of the file
                             !exists changeOwnerInBetweenCall: CallId, changeOwnerInBetweenInvocation: InvocationId, differentUserId: UserId ::
                                     changeOwnerInBetweenCall.op == Op(files(NestedOp(fileId, file_owner(Assign(differentUserId)))))  // change owner to `user`
                                 &&  changeOwnerInBetweenInvocation == changeOwnerInBetweenCall.origin
                                 &&  differentUserId != fileOwnerId
+                                &&  changeOwnerInBetweenInvocation.result != NoResult()
+                                &&  changeOwnerInBetweenInvocation.result != createFile_res(NoFile)
+                                &&  changeOwnerInBetweenInvocation.result != changeOwnerPermission_res(false)
                                 &&  changeOwnerInBetweenInvocation happened before readInvocation
                                 &&  changeOwnerInBetweenInvocation happened after changeOwnerInvocation
-                                &&  (changeOwnerInBetweenInvocation happened before changePermissionInvocation || changeOwnerInBetweenInvocation happened after changePermissionInvocation)           
+                                &&  (changeOwnerInBetweenInvocation happened before changePermissionInvocation || changeOwnerInBetweenInvocation happened after changePermissionInvocation || changeOwnerInBetweenInvocation ==  changePermissionInvocation)
                         )
                         && ( // this only applies for user
                              !exists assignAdminCall: CallId, assignAdminInvocation: InvocationId ::
@@ -297,6 +304,22 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
                                 &&  assignAdminInvocation == assignAdminCall.origin 
                                 &&  assignAdminInvocation happened before changeOwnerInvocation
                                 &&  assignAdminInvocation happened before changePermissionInvocation
+                        )
+                        && (
+                            (someAccessRight == UR() || someAccessRight == URW())
+                            ==>
+                                (
+                                    !exists dominatingAdminCall: CallId,  dominatingAdminInvocation: InvocationId, adminOnlyAccessRight: AccessRight :: // admin grants read concurrently(user action must be rejected)
+                                            (adminOnlyAccessRight == ANone() || adminOnlyAccessRight == AW())
+                                        &&  dominatingAdminCall.op == Op(files(NestedOp(fileId, access_right_owner(Assign(adminOnlyAccessRight)))))
+                                        &&  dominatingAdminCall.origin == dominatingAdminInvocation
+                                        &&  dominatingAdminInvocation.result != NoResult()
+                                        &&  dominatingAdminInvocation.result != createFile_res(NoFile)
+                                        &&  dominatingAdminInvocation.result != changeOwnerPermission_res(false)
+                                        &&  dominatingAdminInvocation happened before readInvocation
+                                        &&  !(dominatingAdminInvocation happened before changePermissionInvocation)
+                                        &&  !(dominatingAdminInvocation happened after changePermissionInvocation)  
+                                )
                         )
                         ==>
                             readInvocation.result == readFile_res(true)
