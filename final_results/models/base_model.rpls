@@ -1,0 +1,275 @@
+idtype NodeId
+idtype UserId
+idtype GroupId
+type String
+
+type FileCreateResult = FileRes(file: NodeId) | NoFile()
+
+// Execute Permissions are omitted as they are irrelevant
+// U corresponds to regular user. A corresponds to Admin rights (Admin corresponds to a sudoer in POSIX semantics)
+type AccessRight = 
+      UNone()
+    | UR()
+    | UW()
+    | URW()
+    | ANone()
+    | AR()
+    | AW()
+    | ARW()
+
+////////////////////////////////////////////////
+
+// CRDT specifications
+crdt files: Map_dw[NodeId, {
+    access_right_owner: AFileAccessRights[AccessRight],
+    access_right_group: AFileAccessRights[AccessRight],
+    access_right_other: AFileAccessRights[AccessRight],
+    file_owner: Register[UserId],
+    file_group: Register[GroupId],
+    file_data: Register[UserId] // Dummy data for establishing calls within the READ/WRITE/EXECUTE invocations to be able to use the happened before relation
+}]
+
+crdt groups: Map_dw[GroupId, {
+    group_users: Set_rw[UserId],
+    created: Register[Bool]
+}]
+
+crdt users: Map_uw[UserId, {
+    is_admin: Register[Bool]
+}]
+
+////////////////////////////////////////////////
+
+def changeOwner(userId: UserId, newOwnerId: UserId, fileId: NodeId): Bool
+    atomic 
+        if (filesQry(ContainsKey(fileId)))
+            if (usersQry(ContainsKey(userId)) && (usersQry(NestedQuery(userId, is_adminQry(ReadRegister))) == true))
+                call files(NestedOp(fileId, file_owner(Assign(newOwnerId))))
+                return true
+            else
+                return false
+        else 
+            return false
+
+
+def changeGroup(userId: UserId, newGroupId: GroupId, fileId: NodeId): Bool
+    atomic
+        if (filesQry(ContainsKey(fileId)))
+            if(
+                (usersQry(ContainsKey(userId)) && usersQry(NestedQuery(userId, is_adminQry(ReadRegister))) == true)
+            )
+                call files(NestedOp(fileId, file_group(Assign(newGroupId))))
+                return true
+            else
+                return false
+        else
+            return false
+
+
+def changeOwnerPermission(userId: UserId,  newPermission: AccessRight, fileId: NodeId): Bool
+    atomic
+        if (!usersQry(ContainsKey(userId)))
+            return false
+
+        if(!filesQry(ContainsKey(fileId)))
+            return false
+
+        if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+            call files(NestedOp(fileId, access_right_owner(Assign(newPermission))))
+            return true
+        else
+            if(filesQry(NestedQuery(fileId, file_ownerQry(ReadRegister))) == userId)
+                if(newPermission == UNone() || newPermission == UW() || newPermission == UR() || newPermission == URW())
+                    call files(NestedOp(fileId, access_right_owner(Assign(newPermission))))
+                    return true
+                else
+                    return false
+            else 
+                return false
+
+
+def changeGroupPermission(userId: UserId, newPermission: AccessRight, fileId: NodeId): Bool
+    atomic
+        if (!usersQry(ContainsKey(userId)))
+            return false
+
+        if(!filesQry(ContainsKey(fileId)))
+            return false
+
+        if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+            call files(NestedOp(fileId, access_right_group(Assign(newPermission))))
+            return true
+        else
+            if(filesQry(NestedQuery(fileId, file_ownerQry(ReadRegister))) == userId)
+                if(newPermission == UNone() || newPermission == UW() || newPermission == UR() || newPermission == URW())
+                    call files(NestedOp(fileId, access_right_group(Assign(newPermission))))
+                    return true
+                else
+                    return false
+            else 
+                return false
+
+
+def changeOtherPermission(userId: UserId, newPermission: AccessRight, fileId: NodeId): Bool
+    atomic
+        if (!usersQry(ContainsKey(userId)))
+            return false
+
+        if(!filesQry(ContainsKey(fileId)))
+            return false
+
+        if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+            call files(NestedOp(fileId, access_right_other(Assign(newPermission))))
+            return true
+        else
+            if(filesQry(NestedQuery(fileId, file_ownerQry(ReadRegister))) == userId)
+                if(newPermission == UNone() || newPermission == UW() || newPermission == UR() || newPermission == URW())
+                    call files(NestedOp(fileId, access_right_other(Assign(newPermission))))
+                    return true
+                else
+                    return false
+            else 
+                return false
+
+
+def createFile(userId: UserId, groupId: GroupId): FileCreateResult
+    var f: NodeId
+    atomic
+        if ((usersQry(ContainsKey(userId))) && groupsQry(ContainsKey(groupId)) && groupsQry(NestedQuery(groupId, group_usersQry(Contains(userId)))))
+            f = new NodeId
+            call files(NestedOp(f, file_owner(Assign(userId)))) //associate a user
+            call files(NestedOp(f, file_group(Assign(groupId)))) //associate group to user
+
+            if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+                call files(NestedOp(f, access_right_owner(Assign(ARW())))) //default rw for owner
+                call files(NestedOp(f, access_right_group(Assign(AR())))) //default r   for group
+                call files(NestedOp(f, access_right_other(Assign(AR())))) //default r   for other
+            else
+                call files(NestedOp(f, access_right_owner(Assign(URW())))) //default rw for owner
+                call files(NestedOp(f, access_right_group(Assign(UR())))) //default r   for group
+                call files(NestedOp(f, access_right_other(Assign(UR())))) //default r   for other
+            
+            return FileRes(f)
+        else
+            return NoFile()
+
+
+def readFile(userId: UserId, fileId: NodeId): Bool
+    var ownerFilePerms: AccessRight
+    var groupFilePerms: AccessRight
+    var otherFilePerms: AccessRight
+    var fileGroup: GroupId
+    var data: UserId
+    atomic
+        if(!(filesQry(ContainsKey(fileId))))
+            return false
+            
+        if(!usersQry(ContainsKey(userId)))
+            return false
+            
+        if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+            data = filesQry(NestedQuery(fileId, file_dataQry(ReadRegister))) // establish a read
+            return true
+
+        // read as owner
+        if(filesQry(NestedQuery(fileId, file_ownerQry(ReadRegister))) == userId) // check if owner
+            ownerFilePerms = filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB)))
+            if(ownerFilePerms == UR() || ownerFilePerms == URW() || ownerFilePerms == AR() || ownerFilePerms == ARW())
+                data = filesQry(NestedQuery(fileId, file_dataQry(ReadRegister))) // establish a read
+                return true
+            else
+                return false
+
+        // read as group
+        fileGroup = filesQry(NestedQuery(fileId, file_groupQry(ReadRegister)))
+        if(groupsQry(NestedQuery(fileGroup, group_usersQry(Contains(userId)))))
+            groupFilePerms = filesQry(NestedQuery(fileId, access_right_groupQry(ReadPermsLB)))
+            if(groupFilePerms == UR() || groupFilePerms == URW() || groupFilePerms == AR() || groupFilePerms == ARW())
+                data = filesQry(NestedQuery(fileId, file_dataQry(ReadRegister))) // establish a read
+                return true
+            else
+                return false
+            
+        //otherwise user is other
+        otherFilePerms = filesQry(NestedQuery(fileId, access_right_otherQry(ReadPermsLB)))
+        if(otherFilePerms == UR() || otherFilePerms == URW() || otherFilePerms == AR() || otherFilePerms == ARW())
+            data = filesQry(NestedQuery(fileId, file_dataQry(ReadRegister))) // establish a read
+            return true
+        else
+            return false
+
+
+def writeFile(userId: UserId, fileId: NodeId): Bool
+    var ownerFilePerms: AccessRight
+    var groupFilePerms: AccessRight
+    var otherFilePerms: AccessRight
+    var fileGroup: GroupId
+    var data: UserId
+    atomic
+        if(!(filesQry(ContainsKey(fileId))))
+            return false
+            
+        if(!usersQry(ContainsKey(userId)))
+            return false
+            
+        if(usersQry(NestedQuery(userId, is_adminQry(ReadRegister))))
+            call files(NestedOp(fileId, file_data(Assign(userId)))) // establish a write
+            return true
+
+        if(filesQry(NestedQuery(fileId, file_ownerQry(ReadRegister))) == userId) // check if owner
+            ownerFilePerms = filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB)))
+            if(ownerFilePerms == UW() || ownerFilePerms == URW() || ownerFilePerms == AW() || ownerFilePerms == ARW())
+                call files(NestedOp(fileId, file_data(Assign(userId)))) // establish a write
+                return true
+            else
+                return false
+
+        fileGroup = filesQry(NestedQuery(fileId, file_groupQry(ReadRegister)))
+        if(groupsQry(NestedQuery(fileGroup, group_usersQry(Contains(userId)))))
+            groupFilePerms = filesQry(NestedQuery(fileId, access_right_groupQry(ReadPermsLB)))
+            if(groupFilePerms == UW() || groupFilePerms == URW() || groupFilePerms == AW() || groupFilePerms == ARW())
+                call files(NestedOp(fileId, file_data(Assign(userId)))) // establish a write
+                return true
+            else
+                return false
+            
+        otherFilePerms = filesQry(NestedQuery(fileId, access_right_otherQry(ReadPermsLB)))
+        if(otherFilePerms == UW() || otherFilePerms == URW() || otherFilePerms == AW() || otherFilePerms == ARW())
+            call files(NestedOp(fileId, file_data(Assign(userId)))) // establish a write
+            return true
+        else
+            return false
+
+
+def createUser(with_admin_rights: Bool) : UserId
+    var u: UserId
+    atomic
+        u = new UserId
+        call users(NestedOp(u, is_admin(Assign(with_admin_rights))))
+        return u
+
+
+def createUser(with_admin_rights: Bool) : UserId
+    var u: UserId
+    atomic
+        u = new UserId
+        call users(NestedOp(u, is_admin(Assign(with_admin_rights))))
+        return u
+
+
+def createGroup() : GroupId
+    var g: GroupId
+    atomic
+        g = new GroupId
+        call groups(NestedOp(g, created(Assign(true))))
+        return g
+
+
+def assignUserToGroup(authorId: UserId, groupId: GroupId, userId: UserId) : Bool
+    atomic
+        if(usersQry(ContainsKey(authorId)) && (usersQry(NestedQuery(authorId, is_adminQry(ReadRegister))) == true) && usersQry(ContainsKey(userId)) && groupsQry(ContainsKey(groupId)))
+            call groups(NestedOp(groupId, group_users(Add(userId))))
+            return true
+        else
+            return false
+
