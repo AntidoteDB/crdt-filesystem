@@ -1,0 +1,533 @@
+digraph G {
+	graph [overlap=false,
+		splines=true
+	];
+	subgraph cluster_invoc_2 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_2
+      createUser(false)
+      result: createUser_res(UserId_3)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_2 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_2,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_2	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_2
+Op(users(NestedOp_UserId_StructIs_adminUser_groupOp(UserId_3, is_admin(Assign_Bool(false)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_14 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_14
+      changeOwnerPermission(UserId_4, ANone(), NodeId_7)
+      result: changeOwnerPermission_res(true)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_12 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_12,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_18	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_18
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_4)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_20	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_20
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_4, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_21	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_21
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, access_right_owner(Assign_AccessRight(ANone())))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_19	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_19
+Qry(filesQry(ContainsKey_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7)))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_25 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_25
+      changeOwnerPermission(UserId_4, AR(), NodeId_7)
+      result: changeOwnerPermission_res(true)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_25 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_25,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_29	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_29
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, access_right_owner(Assign_AccessRight(AR())))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_27	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_27
+Qry(filesQry(ContainsKey_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_28	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_28
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_4, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_26	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_26
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_4)))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_4 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_4
+      createUser(true)
+      result: createUser_res(UserId_4)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_4 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_4,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_3	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_3
+Op(users(NestedOp_UserId_StructIs_adminUser_groupOp(UserId_4, is_admin(Assign_Bool(true)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_9 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_9
+      assignUserToGroup(UserId_4, GroupId_2, UserId_3)
+      result: assignUserToGroup_res(true)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_9 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_9,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_4	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_4
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_4)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_8	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_8
+Op(groups(NestedOp_GroupId_StructGroup_usersCreatedOp(GroupId_2, group_users(Add_UserId(UserId_3)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_5	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_5
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_4, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_6	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_6
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_3)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_7	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_7
+Qry(groupsQry(ContainsKey_GroupId_StructGroup_usersCreatedQuery(GroupId_2)))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_27 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_27
+      createGroup()
+      result: -",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		empty_invoc_27	[color=white,
+			style="filled,dashed"];
+	}
+	subgraph cluster_invoc_29 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_29
+      readFile(UserId_3, NodeId_7)
+      result: readFile_res(true)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_28 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_28,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_34	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_34
+Qry(filesQry(NestedQuery_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7, access_right_ownerQry(ReadPermsLB_AccessRight()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_30	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_30
+Qry(filesQry(ContainsKey_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_35	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_35
+Qry(filesQry(NestedQuery_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7, file_dataQry(ReadRegister_UserId()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_32	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_32
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_3, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_31	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_31
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_3)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_33	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_33
+Qry(filesQry(NestedQuery_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7, file_ownerQry(ReadRegister_UserId()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_20 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_20
+      changeOwner(UserId_4, UserId_3, NodeId_7)
+      result: changeOwner_res(true)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_20 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_20,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_24	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_24
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_4, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_23	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_23
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_4)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_25	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_25
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, file_owner(Assign_UserId(UserId_3)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_22	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_22
+Qry(filesQry(ContainsKey_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataQuery(\
+NodeId_7)))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_3 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_3
+      createGroup()
+      result: createGroup_res(GroupId_2)",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_3 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_3,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_1	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_1
+Op(groups(NestedOp_GroupId_StructGroup_usersCreatedOp(GroupId_2, created(Assign_Bool(true)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	subgraph cluster_invoc_11 {
+		graph [color="#000000",
+			fillcolor="#eeeeff",
+			label="invoc_11
+      createFile(UserId_3, GroupId_2)
+      result: createFile_res(FileRes(NodeId_7))",
+			style="rounded,filled,dashed"
+		];
+		node [color=white,
+			style="filled,dashed"
+		];
+		subgraph cluster_tx_11 {
+			graph [color="#000000",
+				fillcolor="#eeffee",
+				label=tx_11,
+				style="rounded,filled,dotted"
+			];
+			node [color=white,
+				shape=box,
+				style="rounded,filled"
+			];
+			call_12	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_12
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, file_owner(Assign_UserId(UserId_3)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_9	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_9
+Qry(usersQry(ContainsKey_UserId_StructIs_adminUser_groupQuery(UserId_3)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_10	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_10
+Qry(groupsQry(ContainsKey_GroupId_StructGroup_usersCreatedQuery(GroupId_2)))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_14	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_14
+Qry(usersQry(NestedQuery_UserId_StructIs_adminUser_groupQuery(UserId_3, is_adminQry(ReadRegister_Bool()))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_13	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_13
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, file_group(Assign_GroupId(GroupId_2)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_16	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_16
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, access_right_group(Assign_AccessRight(UR())))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_17	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_17
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, access_right_other(Assign_AccessRight(UR())))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_15	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_15
+Op(files(NestedOp_NodeId_StructAccess_right_otherAccess_right_groupAccess_right_ownerFile_groupFile_ownerFile_dataOp(NodeId_\
+7, access_right_owner(Assign_AccessRight(URW())))))",
+				shape=box,
+				style="rounded,filled,solid"];
+			call_11	[color="#666666",
+				fillcolor="#ffffff",
+				label="call_11
+Qry(groupsQry(NestedQuery_GroupId_StructGroup_usersCreatedQuery(GroupId_2, group_usersQry(Contains_UserId(UserId_3)))))",
+				shape=box,
+				style="rounded,filled,solid"];
+		}
+	}
+	call_2 -> call_2;
+	call_2 -> call_4;
+	call_18 -> call_18;
+	call_18 -> call_19;
+	call_20 -> call_20;
+	call_20 -> call_21;
+	call_21 -> call_21;
+	call_21 -> call_26;
+	call_21 -> call_22;
+	call_19 -> call_20;
+	call_19 -> call_19;
+	call_29 -> call_29;
+	call_29 -> call_30;
+	call_27 -> call_27;
+	call_27 -> call_28;
+	call_28 -> call_29;
+	call_28 -> call_28;
+	call_26 -> call_27;
+	call_26 -> call_26;
+	call_3 -> call_3;
+	call_3 -> call_4;
+	call_4 -> call_4;
+	call_4 -> call_5;
+	call_8 -> call_8;
+	call_8 -> call_9;
+	call_5 -> call_5;
+	call_5 -> call_6;
+	call_6 -> call_6;
+	call_6 -> call_7;
+	call_7 -> call_8;
+	call_7 -> call_7;
+	call_34 -> call_34;
+	call_34 -> call_35;
+	call_30 -> call_30;
+	call_30 -> call_31;
+	call_35 -> call_35;
+	call_32 -> call_32;
+	call_32 -> call_33;
+	call_31 -> call_32;
+	call_31 -> call_31;
+	call_33 -> call_34;
+	call_33 -> call_33;
+	call_24 -> call_24;
+	call_24 -> call_25;
+	call_23 -> call_24;
+	call_23 -> call_23;
+	call_25 -> call_30;
+	call_25 -> call_25;
+	call_22 -> call_23;
+	call_22 -> call_22;
+	call_1 -> call_3;
+	call_1 -> call_1;
+	call_12 -> call_12;
+	call_12 -> call_13;
+	call_9 -> call_9;
+	call_9 -> call_10;
+	call_10 -> call_10;
+	call_10 -> call_11;
+	call_14 -> call_14;
+	call_14 -> call_15;
+	call_13 -> call_14;
+	call_13 -> call_13;
+	call_16 -> call_16;
+	call_16 -> call_17;
+	call_17 -> call_18;
+	call_17 -> call_17;
+	call_15 -> call_16;
+	call_15 -> call_15;
+	call_11 -> call_12;
+	call_11 -> call_11;
+  call_2 -> call_4 [style=invis];
+  call_1 -> call_4 [style=invis];
+  call_2 -> call_9 [style=invis];
+  call_1 -> call_9 [style=invis];
+  call_3 -> call_18 [style=invis];
+  call_17 -> call_18 [style=invis];
+  call_2 -> call_22 [style=invis];
+  call_17 -> call_22 [style=invis];
+  call_3 -> call_26 [style=invis];
+  call_17 -> call_26 [style=invis];
+  call_2 -> call_30 [style=invis];
+  call_17 -> call_30 [style=invis];
+}
