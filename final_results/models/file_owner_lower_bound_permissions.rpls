@@ -192,7 +192,7 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
             // A read invocation that succeeds (only capture reads as owner)
             readInvocation.info == readFile(fileOwnerId, fileId) // all the reads that happen after the policy change (protection is applicable)
         &&  readInvocation.result != NoResult()
-        &&  readAsOwnerCall.op == Qry(filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB))))
+        &&  readAsOwnerCall.op == Qry(filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB)))) //  This can be commented out to capture the more general notion of accessing the file as any role
         &&  readAsOwnerCall.origin == readInvocation 
         ==>
             // Quantify a change policy invocation (has an (owner, owner permissions) settings) 
@@ -257,7 +257,7 @@ invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: Invocation
 invariant forall fileId: NodeId, fileOwnerId: UserId, readInvocation: InvocationId, readAsOwnerCall: CallId ::
             readInvocation.info == readFile(fileOwnerId, fileId)
         &&  readInvocation.result != NoResult()
-        &&  readAsOwnerCall.op == Qry(filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB))))
+        &&  readAsOwnerCall.op == Qry(filesQry(NestedQuery(fileId, access_right_ownerQry(ReadPermsLB))))  //  This can be commented out to capture the more general notion of accessing the file as any role
         &&  readAsOwnerCall.origin == readInvocation 
         ==>
             forall  changeOwnerCall: CallId, changeOwnerPermissionCall: CallId, changePolicyInvocation: InvocationId, someAccessRight: AccessRight ::
